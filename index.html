@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxiGo - Premium Taxi Service</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #ffd700;
+            --secondary-color: #333;
+            --accent-color: #4CAF50;
+            --error-color: #ff4444;
+            --success-color: #00C851;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f4f4f4 0%, #e0e0e0 100%);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar h1 {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .page {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background-color: #e6c200;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .car-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .car-option {
+            border: 2px solid #ddd;
+            padding: 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .car-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .car-option.selected {
+            border-color: var(--primary-color);
+            background-color: #fff9e6;
+        }
+
+        .car-option i {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .car-features {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .car-features li {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-estimate {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .price-breakdown {
+            margin-top: 1rem;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .total-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #eee;
+        }
+
+        .confirmation {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .confirmation h2 {
+            color: var(--success-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .booking-details {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .booking-details div {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem auto;
+            }
+
+            .page {
+                padding: 1.5rem;
+            }
+
+            .car-options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1><i class="fas fa-taxi"></i> TaxiGo</h1>
+    </nav>
+
+    <div class="container">
+        <!-- Booking Page -->
+        <div id="bookingPage" class="page active">
+            <h2><i class="fas fa-map-marker-alt"></i> Book Your Ride</h2>
+            <div class="form-group">
+                <label for="pickup">Pickup Location</label>
+                <input type="text" id="pickup" placeholder="Enter pickup location">
+                <div id="pickupError" class="error-message"></div>
+            </div>
+            <div class="form-group">
+                <label for="destination">Destination</label>
+                <input type="text" id="destination" placeholder="Enter destination">
+                <div id="destinationError" class="error-message"></div>
+            </div>
+            <div class="form-group">
+                <label for="datetime">Pickup Time</label>
+                <input type="datetime-local" id="datetime">
+                <div id="datetimeError" class="error-message"></div>
+            </div>
+            <div class="form-group">
+                <label for="passengers">Number of Passengers</label>
+                <select id="passengers">
+                    <option value="1">1 Passenger</option>
+                    <option value="2">2 Passengers</option>
+                    <option value="3">3 Passengers</option>
+                    <option value="4">4 Passengers</option>
+                    <option value="5">5 Passengers</option>
+                    <option value="6">6 Passengers</option>
+                </select>
+            </div>
+            <button onclick="showCarSelection()"><i class="fas fa-arrow-right"></i> Next</button>
+        </div>
+
+        <!-- Car Selection Page -->
+        <div id="carSelectionPage" class="page">
+            <h2><i class="fas fa-car"></i> Select Your Ride</h2>
+            <div class="car-options-grid">
+                <div class="car-option" onclick="selectCar(this, 'Economy', 1.0)">
+                    <i class="fas fa-car"></i>
+                    <h3>Economy</h3>
+                    <p>Budget-friendly option for daily commute</p>
+                    <ul class="car-features">
+                        <li><i class="fas fa-user"></i> Up to 4 passengers</li>
+                        <li><i class="fas fa-suitcase"></i> 2 bags</li>
+                        <li><i class="fas fa-dollar-sign"></i> Base rate: $8</li>
+                    </ul>
+                </div>
+                <div class="car-option" onclick="selectCar(this, 'Standard', 1.2)">
+                    <i class="fas fa-car-side"></i>
+                    <h3>Standard</h3>
+                    <p>Comfortable ride for any occasion</p>
+                    <ul class="car-features">
+                        <li><i class="fas fa-user"></i> Up to 4 passengers</li>
+                        <li><i class="fas fa-suitcase"></i> 3 bags</li>
+                        <li><i class="fas fa-dollar-sign"></i> Base rate: $10</li>
+                    </ul>
+                </div>
+                <div class="car-option" onclick="selectCar(this, 'Premium', 1.5)">
+                    <i class="fas fa-car-alt"></i>
+                    <h3>Premium</h3>
+                    <p>Luxury vehicle for special moments</p>
+                    <ul class="car-features">
+                        <li><i class="fas fa-user"></i> Up to 4 passengers</li>
+                        <li><i class="fas fa-suitcase"></i> 4 bags</li>
+                        <li><i class="fas fa-dollar-sign"></i> Base rate: $15</li>
+                    </ul>
+                </div>
+                <div class="car-option" onclick="selectCar(this, 'Van', 1.8)">
+                    <i class="fas fa-shuttle-van"></i>
+                    <h3>Van</h3>
+                    <p>Spacious ride for groups</p>
+                    <ul class="car-features">
+                        <li><i class="fas fa-user"></i> Up to 6 passengers</li>
+                        <li><i class="fas fa-suitcase"></i> 6 bags</li>
+                        <li><i class="fas fa-dollar-sign"></i> Base rate: $20</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="price-estimate">
+                <h3>Price Estimate</h3>
+                <div class="price-breakdown">
+                    <div class="price-item">
+                        <span>Base Fare</span>
+                        <span id="baseFare">$0.00</span>
+                    </div>
+                    <div class="price-item">
+                        <span>Distance Fee</span>
+                        <span id="distanceFee">$0.00</span>
+                    </div>
+                    <div class="price-item">
+                        <span>Time of Day Surcharge</span>
+                        <span id="timeSurcharge">$0.00</span>
+                    </div>
+                    <div class="total-price">
+                        <span>Total Estimated Price</span>
+                        <span id="totalPrice">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button onclick="showBookingPage()" style="background-color: #f4f4f4;">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button onclick="showConfirmation()" style="margin-left: 1rem;">
+                    <i class="fas fa-check"></i> Book Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Confirmation Page -->
+        <div id="confirmationPage" class="page">
+            <div class="confirmation">
+                <h2><i class="fas fa-check-circle"></i> Booking Confirmed!</h2>
+                <p>Your taxi will arrive at the specified time.</p>
+                <div class="booking-details" id="bookingDetails">
+                    <!-- Booking details will be inserted here -->
+                </div>
+                <button onclick="resetBooking()">
+                    <i class="fas fa-plus"></i> Book Another Ride
+                </button>
+            </div>
+        </div>
+        
+    </div>
+
+
+    <script>
+            let selectedCarType = '';
+            let selectedCarMultiplier = 1.0;
+            const BASE_DISTANCE_RATE = 2.0; // $ per km
+            const PEAK_HOUR_MULTIPLIER = 1.5;
+    
+            // Navigation functions
+            function showPage(pageId) {
+                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+            }
+    
+            function validateField(fieldId, errorId, message) {
+                const field = document.getElementById(fieldId);
+                const errorElement = document.getElementById(errorId);
+                if (!field.value) {
+                    errorElement.textContent = message;
+                    return false;
+                }
+                errorElement.textContent = '';
+                return true;
+            }
+    
+            function showBookingPage() {
+                showPage('bookingPage');
+            }
+    
+            function showCarSelection() {
+                // Validate all fields
+                const isPickupValid = validateField('pickup', 'pickupError', 'Please enter pickup location');
+                const isDestinationValid = validateField('destination', 'destinationError', 'Please enter destination');
+                const isDateTimeValid = validateField('datetime', 'datetimeError', 'Please select pickup time');
+    
+                if (!isPickupValid || !isDestinationValid || !isDateTimeValid) {
+                    return;
+                }
+    
+                showPage('carSelectionPage');
+                calculatePrice(); // Initial price calculation
+            }
+    
+            function selectCar(element, carType, multiplier) {
+                document.querySelectorAll('.car-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                selectedCarType = carType;
+                selectedCarMultiplier = multiplier;
+                calculatePrice();
+            }
+    
+            function getBaseRate(carType) {
+                const rates = {
+                    'Economy': 8,
+                    'Standard': 10,
+                    'Premium': 15,
+                    'Van': 20
+                };
+                return rates[carType] || 8;
+            }
+    
+            function calculateDistance(pickup, destination) {
+                // Simulate distance calculation - in real app would use Maps API
+                // For demo, generate a random distance between 5 and 30 km
+                return Math.floor(Math.random() * 25) + 5;
+            }
+    
+            function isPeakHour(datetime) {
+                const hour = new Date(datetime).getHours();
+                // Consider peak hours between 7-9 AM and 4-7 PM
+                return (hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 19);
+            }
+    
+            function formatPrice(price) {
+                return '$' + price.toFixed(2);
+            }
+    
+            function calculatePrice() {
+                if (!selectedCarType) return;
+    
+                const pickup = document.getElementById('pickup').value;
+                const destination = document.getElementById('destination').value;
+                const datetime = document.getElementById('datetime').value;
+    
+                // Calculate distance fee
+                const distance = calculateDistance(pickup, destination);
+                const baseRate = getBaseRate(selectedCarType);
+                const distanceFee = distance * BASE_DISTANCE_RATE * selectedCarMultiplier;
+    
+                // Calculate time surcharge
+                const timeSurcharge = isPeakHour(datetime) ? 
+                    (baseRate + distanceFee) * (PEAK_HOUR_MULTIPLIER - 1) : 0;
+    
+                // Update price breakdown
+                document.getElementById('baseFare').textContent = formatPrice(baseRate);
+                document.getElementById('distanceFee').textContent = formatPrice(distanceFee);
+                document.getElementById('timeSurcharge').textContent = formatPrice(timeSurcharge);
+                document.getElementById('totalPrice').textContent = 
+                    formatPrice(baseRate + distanceFee + timeSurcharge);
+            }
+    
+            function showConfirmation() {
+                if (!selectedCarType) {
+                    alert('Please select a car type');
+                    return;
+                }
+    
+                const pickup = document.getElementById('pickup').value;
+                const destination = document.getElementById('destination').value;
+                const datetime = new Date(document.getElementById('datetime').value);
+                const passengers = document.getElementById('passengers').value;
+                const totalPrice = document.getElementById('totalPrice').textContent;
+    
+                const bookingDetails = document.getElementById('bookingDetails');
+                bookingDetails.innerHTML = `
+                    <div>
+                        <strong>Pickup Location:</strong>
+                        <p>${pickup}</p>
+                    </div>
+                    <div>
+                        <strong>Destination:</strong>
+                        <p>${destination}</p>
+                    </div>
+                    <div>
+                        <strong>Pickup Time:</strong>
+                        <p>${datetime.toLocaleString()}</p>
+                    </div>
+                    <div>
+                        <strong>Number of Passengers:</strong>
+                        <p>${passengers}</p>
+                    </div>
+                    <div>
+                        <strong>Car Type:</strong>
+                        <p>${selectedCarType}</p>
+                    </div>
+                    <div>
+                        <strong>Total Price:</strong>
+                        <p>${totalPrice}</p>
+                    </div>
+                    <div>
+                        <strong>Booking Reference:</strong>
+                        <p>#${Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                    </div>
+                `;
+    
+                showPage('confirmationPage');
+            }
+    
+            function resetBooking() {
+                // Reset all form fields
+                document.getElementById('pickup').value = '';
+                document.getElementById('destination').value = '';
+                document.getElementById('datetime').value = '';
+                document.getElementById('passengers').value = '1';
+                
+                // Reset selected car
+                selectedCarType = '';
+                selectedCarMultiplier = 1.0;
+                document.querySelectorAll('.car-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Reset price displays
+                document.getElementById('baseFare').textContent = '$0.00';
+                document.getElementById('distanceFee').textContent = '$0.00';
+                document.getElementById('timeSurcharge').textContent = '$0.00';
+                document.getElementById('totalPrice').textContent = '$0.00';
+                
+                // Show booking page
+                showBookingPage();
+            }
+    
+            // Initialize datetime input with current date/time
+            document.addEventListener('DOMContentLoaded', function() {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('datetime').value = now.toISOString().slice(0, 16);
+            });
+        </script>
+    </body>
+    </html>
